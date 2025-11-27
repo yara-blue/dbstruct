@@ -140,7 +140,7 @@ where
     {
         let key = bincode::serde::encode_to_vec(key, key_config())
             .map_err(Error::<Self::DbError>::SerializingKey)?;
-        trace!("removing at key: {key:?}");
+        trace!("getting at key: {key:?}");
         let val = BS::get(self, &key).map_err(Error::Database)?;
         Ok(val.is_some())
     }

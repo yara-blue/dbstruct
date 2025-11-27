@@ -51,7 +51,7 @@ where
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let db = Test::new()?;
-    /// db.name().set("Artemis")?;
+    /// db.name().set(Some("Artemis"))?;
     /// assert_eq!(db.name().get()?, Some("Artemis".to_owned()));
     /// # Ok(())
     /// # }
@@ -85,7 +85,7 @@ where
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let db = Test::new()?;
     /// assert_eq!(db.name().get()?, None);
-    /// db.name().set("Artemis")?;
+    /// db.name().set(Some("Artemis"))?;
     /// assert_eq!(db.name().get()?, Some("Artemis".to_owned()));
     /// # Ok(())
     /// # }
@@ -110,13 +110,13 @@ where
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let db = Test::new()?;
     /// assert!(db.name().is_none()?);
-    /// db.name().set("Artemis")?;
+    /// db.name().set(Some("Artemis"))?;
     /// assert!(!db.name().is_none()?);
     /// # Ok(())
     /// # }
     /// ```
     pub fn is_none(&self) -> Result<bool, Error<E>> {
-        self.ds.contains(&self.key)
+        self.is_some().map(|b| !b)
     }
 
     /// Returns `true` if the option is a `Some` value.
@@ -135,13 +135,13 @@ where
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let db = Test::new()?;
     /// assert!(!db.name().is_some()?);
-    /// db.name().set("Artemis")?;
+    /// db.name().set(Some("Artemis"))?;
     /// assert!(db.name().is_some()?);
     /// # Ok(())
     /// # }
     /// ```
     pub fn is_some(&self) -> Result<bool, Error<E>> {
-        self.is_none().map(|b| !b)
+        self.ds.contains(&self.key)
     }
 }
 
@@ -172,7 +172,7 @@ where
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let db = Test::new()?;
-    /// db.name().set("Elijah Baley")?;
+    /// db.name().set(Some("Elijah Baley"))?;
     /// db.name().update(first_name);
     /// assert_eq!(db.name().get()?, Some("Elijah".to_owned()));
     /// # Ok(())
@@ -201,7 +201,7 @@ where
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let db = Test::new()?;
-    /// db.name().set("Artemis")?;
+    /// db.name().set(Some("Artemis"))?;
     /// db.name().conditional_update("Artemis", "Helios");
     /// assert_eq!(db.name().get()?, Some("Helios".to_owned()));
     /// db.name().conditional_update("Artemis", "Zeus");

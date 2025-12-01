@@ -86,8 +86,8 @@ note: required by a bound in `DefaultTrait`
 error[E0277]: the trait bound `CustomType: serde::ser::Serialize` is not satisfied
  --> tests/ui/trait_is_missing.rs:7:1
   |
- 7 | #[dbstruct(db=sled)]
-   | ^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
+ 7 | #[dbstruct(db=btreemap)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
    |
 help: the trait `serde::ser::Serialize` is not implemented for `CustomType`
   --> tests/ui/trait_is_missing.rs:3:1
@@ -119,8 +119,8 @@ note: required by a bound in `DefaultTrait`
 error[E0277]: the trait bound `CustomType: Default` is not satisfied
  --> tests/ui/trait_is_missing.rs:7:1
   |
- 7 | #[dbstruct(db=sled)]
-   | ^^^^^^^^^^^^^^^^^^^^ the trait `Default` is not implemented for `CustomType`
+ 7 | #[dbstruct(db=btreemap)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Default` is not implemented for `CustomType`
    |
 note: required by a bound in `DefaultTrait`
   --> src/wrapper/default_trait.rs
@@ -140,8 +140,8 @@ help: consider annotating `CustomType` with `#[derive(Default)]`
 error[E0277]: the trait bound `for<'de> CustomType: serde::de::Deserialize<'de>` is not satisfied
  --> tests/ui/trait_is_missing.rs:7:1
   |
- 7 | #[dbstruct(db=sled)]
-   | ^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
+ 7 | #[dbstruct(db=btreemap)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
    |
 help: the trait `for<'de> serde::de::Deserialize<'de>` is not implemented for `CustomType`
   --> tests/ui/trait_is_missing.rs:3:1

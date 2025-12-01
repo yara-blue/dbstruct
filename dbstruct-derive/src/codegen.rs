@@ -18,6 +18,10 @@ pub fn codegen(ir: Ir) -> TokenStream {
             impl<DS> #struct_ident<DS> #bounds {
                 #new_impls
                 #accessors
+
+                fn into_inner(self) -> DS {
+                    self.ds
+                }
             }
         ),
         None => quote!(

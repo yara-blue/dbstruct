@@ -15,7 +15,7 @@ pub enum Error {
 /// ### ALL CHANGES ARE LOST WHEN THE OBJECT IS DROPPED
 /// again: use for testing the API only
 ///
-#[derive(Default, Clone)]
+#[derive(Debug, Default, Clone)]
 pub struct BTreeMap(Arc<RwLock<collections::BTreeMap<Vec<u8>, Vec<u8>>>>);
 
 impl BTreeMap {

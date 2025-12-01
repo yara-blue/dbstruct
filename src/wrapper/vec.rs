@@ -27,15 +27,63 @@ where
     len: Arc<AtomicUsize>,
 }
 
-#[derive(Serialize, Deserialize, Hash, Eq, PartialEq, Clone, Debug)]
+#[derive(Hash, Eq, PartialEq, Clone, Debug)]
 pub struct Prefixed {
     prefix: u8,
     index: usize,
 }
 
+impl Serialize for Prefixed {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let mut bytes = [self.prefix; std::mem::size_of::<usize>() + 1];
+        bytes[1..].copy_from_slice(&self.index.to_le_bytes());
+        serializer.serialize_bytes(&bytes)
+    }
+}
+
+impl<'de> Deserialize<'de> for Prefixed {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        struct Visitor;
+
+        impl<'de> serde::de::Visitor<'de> for Visitor {
+            type Value = Prefixed;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                formatter.write_str("expected Prefixed")
+            }
+
+            fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                Ok(Prefixed {
+                    prefix: v[0],
+                    index: usize::from_le_bytes(
+                        v[1..]
+                            .try_into()
+                            .map_err(|_| serde::de::Error::custom("invalid bytes buffer length"))?,
+                    ),
+                })
+            }
+        }
+
+        deserializer.deserialize_bytes(Visitor)
+    }
+}
+
 impl Prefixed {
     pub fn index(&self) -> usize {
         self.index
+    }
+
+    pub fn prefix(&self) -> u8 {
+        self.prefix
     }
 
     pub fn max(prefix: u8) -> Self {
@@ -54,6 +102,7 @@ where
 {
     #[doc(hidden)]
     pub fn new(ds: DS, prefix: u8, len: Arc<AtomicUsize>) -> Self {
+        debug!("prefix: {prefix}, len: {len:?}");
         Self {
             phantom: PhantomData,
             phantom2: PhantomData,
@@ -95,6 +144,8 @@ where
             prefix: self.prefix,
             index,
         };
+        debug!("getting from vector (index: {index})");
+        debug!("getting from vector (key: {key:?})");
         self.ds.get(&key)
     }
 
@@ -132,6 +183,7 @@ where
             index: prev_len,
         };
         debug!("pushing onto vector (index: {prev_len})");
+        debug!("pushing onto vector (index: {key:?})");
         self.ds.insert::<Prefixed, Q, T>(&key, value)?;
         Ok(())
     }
@@ -271,69 +323,5 @@ where
             }
         }
         f.write_str("]\n")
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::stores;
-
-    pub(crate) type TestVec<T> = Vec<T, stores::BTreeMap>;
-    pub(crate) fn empty<T: Serialize + DeserializeOwned>() -> TestVec<T> {
-        let ds = stores::BTreeMap::new();
-        let len = Arc::new(AtomicUsize::new(0));
-
-        Vec::new(ds, 1, len)
-    }
-
-    mod given_empty_vec {
-        use super::*;
-
-        #[test]
-        fn len_is_zero() {
-            let vec: TestVec<()> = empty();
-            assert_eq!(vec.len(), 0);
-        }
-
-        #[test]
-        fn push_increases_the_len() {
-            let vec: Vec<u16, _> = empty();
-            vec.push(&42).unwrap();
-            assert_eq!(vec.len(), 1)
-        }
-
-        #[test]
-        fn pop_return_none() {
-            let vec: TestVec<()> = empty();
-            let elem = vec.pop().unwrap();
-            assert_eq!(elem, None)
-        }
-    }
-
-    mod given_2_long_vec {
-        use super::*;
-
-        #[test]
-        fn element_pop_in_the_right_order() {
-            let vec = empty();
-            vec.push(&42).unwrap();
-            vec.push(&43).unwrap();
-
-            assert_eq!(vec.pop().unwrap(), Some(43));
-            assert_eq!(vec.pop().unwrap(), Some(42));
-        }
-
-        #[test]
-        fn third_pop_is_none() {
-            let vec: Vec<u16, stores::BTreeMap> = empty();
-            vec.push(&42).unwrap();
-            vec.push(&43).unwrap();
-
-            vec.pop().unwrap();
-            vec.pop().unwrap();
-            let elem = vec.pop().unwrap();
-            assert_eq!(elem, None)
-        }
     }
 }

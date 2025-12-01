@@ -82,7 +82,7 @@ pub enum Backend {
     HashMap,
     BTreeMap,
     Trait {
-        bounds: Vec<ExtraBound>,
+        bounds: HashSet<ExtraBound>,
     },
     #[cfg(test)]
     Test,

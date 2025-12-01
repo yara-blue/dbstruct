@@ -50,6 +50,9 @@ impl Prefixed {
             index: u64::MAX,
         }
     }
+    pub fn prefix(&self) -> u8 {
+        self.prefix
+    }
 }
 
 impl<T, E, DS> VecDeque<T, DS>

@@ -39,6 +39,7 @@ fn len_expr(ty: &syn::Type, prefix: u8) -> Box<syn::Expr> {
                         &::dbstruct::wrapper::VecPrefixed::max(#prefix),
                     )?
                     .map(|(key, _): (::dbstruct::wrapper::VecPrefixed, #ty)| key)
+                    .filter(|key| key.prefix() == #prefix)
                     .map(|key| key.index() + 1) // a vecs len is index + 1
                     .unwrap_or(0)
             ) // atomic new
@@ -56,6 +57,7 @@ fn tail_expr(ty: &syn::Type, prefix: u8) -> Box<syn::Expr> {
                         &::dbstruct::wrapper::DequePrefixed::max(#prefix),
                     )?
                     .map(|(key, _): (::dbstruct::wrapper::DequePrefixed, #ty)| key)
+                    .filter(|key| key.prefix() == #prefix)
                     .map(|key| key.index() + 1)
                     .unwrap_or(u64::MAX / 2)
             ) // atomic new
@@ -73,6 +75,7 @@ fn head_expr(ty: &syn::Type, prefix: u8) -> Box<syn::Expr> {
                         &::dbstruct::wrapper::DequePrefixed::min(#prefix),
                     )?
                     .map(|(key, _): (::dbstruct::wrapper::DequePrefixed, #ty)| key)
+                    .filter(|key| key.prefix() == #prefix)
                     .map(|key| key.index() - 1)
                     .unwrap_or(u64::MAX / 2 - 1)
             ) // atomic new
@@ -309,11 +312,7 @@ fn db_setup_to_new_method(db: DbSetup, model: &Model, struct_def: &Struct) -> Ne
 
     NewMethod {
         locals,
-        members: struct_def
-            .member_vars
-            .iter()
-            .map(as_member)
-            .collect(),
+        members: struct_def.member_vars.iter().map(as_member).collect(),
         vis: model.vis.clone(),
         arg,
         error_ty,

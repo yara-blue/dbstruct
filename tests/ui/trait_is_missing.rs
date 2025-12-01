@@ -4,7 +4,7 @@ struct CustomType {
     field: u8,
 }
 
-#[dbstruct(db=sled)]
+#[dbstruct(db=btreemap)]
 struct Test {
     #[dbstruct(Default)]
     field: CustomType,

@@ -25,7 +25,7 @@ dbstruct-derive = { path = "dbstruct-derive" }
 # dbstruct-derive = "0.4.0"
 thiserror = "2"
 serde = { version = "1", features = ["derive"] }
-bincode = { version = "2", default-features = false, features = ["serde", "std"] }
+bincode = { version = "3", default-features = false, features = ["serde", "std"] }
 tracing = "0.1"
 
 # these create implicit dependencies called `sled` and `rocksdb`

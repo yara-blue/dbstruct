@@ -21,7 +21,7 @@ quote = "1"
 proc-macro2 = "1" 
 proc-macro-error = "1"
 thiserror = "2"
-itertools = "0.14"
+itertools = "0.15"
 
 [lib]
 proc-macro = true
